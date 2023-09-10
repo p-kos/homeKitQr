@@ -1,2 +1,2 @@
 # homeKitQr
-QR for Homekit, with tasmota code
+Open it in Linqpad7
