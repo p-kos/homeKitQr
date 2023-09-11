@@ -13,6 +13,7 @@
   <Namespace>ZXing.Windows.Compatibility</Namespace>
   <Namespace>System.Drawing.Imaging</Namespace>
   <Namespace>System.Drawing.Drawing2D</Namespace>
+  <Namespace>ZXing.Common</Namespace>
   <IncludeAspNet>true</IncludeAspNet>
 </Query>
 
@@ -29,9 +30,9 @@ void Main()
 	
 	using (var b = new System.Drawing.Bitmap(200, 100))
 	using (var g = Graphics.FromImage(b))
-	using (var f = new Font("Arial", 15))
+	using (var f = new Font("Roboto-Bold", 15))
 	{
-		//g.SmoothingMode = SmoothingMode.AntiAlias;
+		g.SmoothingMode = SmoothingMode.AntiAlias;
 		//g.FillRectangle(Brushes.Black, 0, 0, 150, 200);
 		//g.
 		g.DrawString(passwordLine1, f, Brushes.Black, 100, 0);
