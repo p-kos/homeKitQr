@@ -17,40 +17,56 @@
   <IncludeAspNet>true</IncludeAspNet>
 </Query>
 
+string password = "031-45-154";
+string setupId = "1QJ8";
+
+readonly string path = Path.Combine(Path.GetDirectoryName(Util.CurrentQueryPath), "homekitCode.png");
+readonly string qrBg = Path.Combine(Path.GetDirectoryName(Util.CurrentQueryPath), "qrcode.png");
+
 void Main()
 {
-	var password = "031-45-154"; 
-	
+	var code = createSetupUri(category: HomekitAccessoryCategory.lightbulb, password: password, setupId: setupId);
+
+	generateGuidForTasmotaConfig();	
+	generateQr(generatedCode: code);	
+	generateHomeKitQr();
+}
+
+void generateGuidForTasmotaConfig()
+{
 	var guid = Guid.NewGuid().ToString().ToUpper().Split("-").Last();
 	$"outlet.username = \"{guid[0]}{guid[1]}:{guid[2]}{guid[3]}:{guid[4]}{guid[5]}:{guid[6]}{guid[7]}:{guid[8]}{guid[9]}:{guid[10]}{guid[11]}\"".Dump();
 	$"outlet.pincode = \"{password}\"".Dump();
+}
 
-	var passwordLine1 = string.Join("",password.Replace("-", "").Take(4));
-	var passwordLine2 = string.Join("",password.Replace("-", "").Skip(4));
-	
-	using (var b = new System.Drawing.Bitmap(200, 100))
-	using (var g = Graphics.FromImage(b))
-	using (var f = new Font("Roboto-Bold", 15))
-	{
-		g.SmoothingMode = SmoothingMode.AntiAlias;
-		//g.FillRectangle(Brushes.Black, 0, 0, 150, 200);
-		//g.
-		g.DrawString(passwordLine1, f, Brushes.Black, 100, 0);
-		g.DrawString(passwordLine2, f, Brushes.Black, 100, 30);
-		b.Dump();
-	}
-
+void generateQr(string generatedCode)
+{
 	var barcodeWriter = new BarcodeWriter();
 	barcodeWriter.Format = BarcodeFormat.QR_CODE;
 	barcodeWriter.Options.Width = 200;
 	barcodeWriter.Options.Height = 200;
-
-	var path = Path.Combine( Path.GetDirectoryName (Util.CurrentQueryPath), "homekitCode.png");
-	var code = createSetupUri(category: HomekitAccessoryCategory.lightbulb, password, "1QJ8");
-	//code.Dump();
-	var barcodeBitmap = barcodeWriter.Write(code);
+	var barcodeBitmap = barcodeWriter.Write(generatedCode);
 	barcodeBitmap.Save(path, ImageFormat.Png);
-	Util.Image(path).Dump();
+}
+
+void generateHomeKitQr()
+{
+	var passwordLine1 = string.Join("", password.Replace("-", "").Take(4));
+	var passwordLine2 = string.Join("", password.Replace("-", "").Skip(4));
+
+	using (var b = new System.Drawing.Bitmap(200, 500))
+	using (var g = Graphics.FromImage(b))
+	using (var f = new Font("Roboto-Bold", 20))
+	{
+		Bitmap qr = new Bitmap(path);
+		Bitmap bg = new Bitmap(qrBg);
+		g.SmoothingMode = SmoothingMode.AntiAlias;
+		g.DrawImage(qr, new Rectangle(-20, 45, 240, 240));
+		g.DrawImage(bg, new Rectangle(0, 0, 200, 270));
+		g.DrawString(passwordLine1, f, Brushes.Black, 90, 10);
+		g.DrawString(passwordLine2, f, Brushes.Black, 90, 45);
+		b.Dump();
+	}
 }
 
 // KUDOS: https://github.com/maximkulkin/esp-homekit/blob/0f3ef2ac2872ffe64dfe4e5d929420af327d48a5/include/homekit/types.h#L41
